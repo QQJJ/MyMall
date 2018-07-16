@@ -1,0 +1,115 @@
+# 服务器配置
+server:
+  port: 8080
+  servlet:
+    context-path: /myMall
+
+spring:
+  datasource:
+    hikari:
+      # 只读
+      read-only: false
+      # 等待连接池分配连接的最大时长（毫秒）,超过这个时长还没可用的连接则发生SQLException,缺省:30秒
+      connection-timeout: 30000
+      # 一个连接idle状态的最大时长（毫秒）,超时则被释放（retired）,缺省:10分钟
+      idle-timeout: 600000
+      # 一个连接的生命时长（毫秒）,超时而且没被使用则被释放（retired）,缺省:30分钟,建议设置比数据库超时时长少30秒
+      max-lifetime: 1800000
+      # 连接池中允许的最大连接数。缺省值：10；推荐的公式：((core_count * 2) + effective_spindle_count)
+      maximum-pool-size: 60
+      minimum-idle: 10
+      # 生效超时
+      validation-timeout: 3000
+  profiles:
+    active: dev
+# Freemarker
+  freemarker:
+    template-loader-path: classpath:/templates/
+    cache: false
+    charset: utf-8
+    check-template-location: true
+    content-type: text/html
+    expose-request-attributes: true
+    expose-session-attributes: true
+    request-context-attribute: request
+    suffix: .ftl
+# 静态资源
+  mvc:
+    static-path-pattern: /static/**
+# mybatis配置
+mybatis:
+  mapper-locations: classpath:mapper/**
+  type-aliases-package: com.mall.austen.entity
+# 日志
+logging:
+  level:
+    com.mall: debug
+
+# 支付宝
+alipay:
+  # 应用ID,您的APPID，收款账号既是您的APPID对应支付宝账号
+  appId: 2016091800539317
+  # 商户私钥，您的PKCS8格式RSA2私钥
+  merchantPrivateKey: MIIEwAIBADANBgkqhkiG9w0BAQEFAASCBKowggSmAgEAAoIBAQCQ1mZLR42SOmrZXqFEC3p6F2sLrW8Y6zGYTwyrmRfx1oDctw0BFOt80Hnr4HzJkXRT9XGrJIY80M9IiHoYBGAfXmjpkPr5vBjdR+2Tt4LNoz0TKWwl5JrQlzBjPeOzBCx2bS+BUtrBqiROgd48wZCC8VYo/ei/DE4dpykObEU7Lqk4VZp7SY6ar7EHRBMLcdbJw1wwDxtyQPjfZ7iMrVlctzWh9+4tw+VzTiAKwsdFV0KpTcyy0oyXSwWeDXCeNWgaNMYv3r4uQc27Y61E+nLfpaCUTsxW3NYXhjrNBKydGmzNvrB5a/DN38iLEERYMMjWPIYlaM84zacqPE7vs7fRAgMBAAECggEBAIorfjqib/PntrbXB5EaQiTm4j+pnCpxdEaQYs3wpl8W+qeUGNvHUT8owqa66VCBajAOHfneRhEOQjA3wgHXaruCHSN0I3jKcA3o6EPa9PWnnEQDaCBeDTKgiJCkIexNNv1i+8are/T0kt4yFghvv6SrBj7kunxHCN5Q8WHI9+KUE0D73urW9boNK3EAF6Vw+PftVjtKWVntbu3AMVh/e8qe3rHVe5a7ZRWytbtFfCyKBC2dXZggXFFLGjkUuUeqp+nreb5gh5hkHD5Q87XbfgCHvXfsKKe1K6o29yAZ5q2omHvEXlDXbYlXepqrqdWZnxKQuk7U2tNvqjcMZbeAReECgYEA55Kzz+Vj1BJZMjD9isTWncKvdKeNlN4u+p3YwYftGO56LjCyGmvzL7Dsyuv147j0V2QyDK9ZOnXOivLj+M9CQ+61sWRSXFoeQKxSILYHZaFfJGHwrNNCJuMYtsTvcMvXgD59+uUfg66+TQ5/1xzuvNKPPNX+cr8DWZ7UcE5IfIcCgYEAoB2HMVGCJLpx7HviD/ew4cpq8t1g2PIwB0BZm0twNR7jh7fQusdSnFXB0nV2rGBeIixN/Khy+v0xe5n39jOhWPTPa6CxNbu4JyPp79nvRND5BZVJ6MsOqjppYgAV/fkY+CNMAIo37TuswE0jbInUQeIiTxwvpylkohjTXD1aVucCgYEAtH5CypLHyX73qMhIhkW/5bzd1rXWA6ddxJcNYGLaqWkPMDtiRnfHV2+2UL+zquf5ArikzgBKMuepseF5UO/yfVJsqbRBAZx4If5uEPLwNwWdS5VO6tXKpNay55n96tPmxx1uQgUeGBw2VYcsm3UAm4oefNNqfPNm4A6NFG/fzbcCgYEAmb8A3BiaUU4+qoficNa0oHtP6tksb+VOvQfLg1US788zSFT3NwLCjp/CN6bXR3pZqZLFaAEQN3X8l+UmtuCo49Rff8eTojcZA2x26/tmx7uqAvRxPfoNoOPp4VKXy4HvugWaq0INpd0Raq4nf8dxa7oKm9BC6c7TdNtFyWKYZq0CgYEApqMCRUstbXgtLcWwE/hlb+u6JB2RKtLBpTBk44kUgjtZlFERmc/xcT5qMghMHtJoTysi1XQJQVbUpHkMoT4uj3c33hcNNDEY4PgohdDOoLw/IdRalVqJhJ6iOfMpjKUa5OtZbItZy4w5U0qblC1jPkv7XnjebeIwk5DMr+XWRwI=
+  # 支付宝公钥,查看地址：https://openhome.alipay.com/platform/keyManage.htm 对应APPID下的支付宝公钥。
+  alipayPublicKey: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsM+FqlPU9Sof5/jx1zSxuZbVE+J9hfZ/KqhpYToZO4gvUzs7Db2pbbD4XZJSUDHRxLUbd0ryRrvBh2/LPl8arTJjZZvWDANL//1nf8kfSXpyuxEFWE2X0qddx+iGpmrdqTr/5uxdo+WhjCxGUOIs7hy92wQAtrFXuZZ+FC1vmpcoDMLv0ZO4LTKaSG199930r3s4x6+CqjFcA7fuZM5qw3yaQrtc1k++fpgnKjJuNZAKoLQtQQ7N+St0+wwDpG9SRSIbQW/1cdO3xth1SZhhzHXaV4cuwn10W4Fw5t1vufX61ftycroWRR2Esz1OCWe1gtZ1OtcSuKcTEv353j8pqQIDAQAB
+  # 服务器异步通知页面路径  需http://格式的完整路径，不能加?id=123这类自定义参数，必须外网可以正常访问
+  notifyUrl: http://austen.tunnel.qydev.com/myMall/pay/alipayNotify
+  # 页面跳转同步通知页面路径 需http://格式的完整路径，不能加?id=123这类自定义参数，必须外网可以正常访问
+  returnUrl: http://austen.tunnel.qydev.com/myMall/pay/alipayReturn
+  # 签名方式
+  signType: RSA2
+  # 字符编码格式
+  charset: UTF-8
+  # 支付宝网关
+  gatewayUrl: https://openapi.alipaydev.com/gateway.do
+  # 支付宝网关
+  logPath: D:/logs/
+  #
+  format: json
+  # 商户号
+  sysServiceProviderId: 2088102176171480
+
+
+# 常量
+
+# 七牛
+ACCESSKEY: b3i8k1UivSyu0WSBKfNWaerKtqjWPyVSd8jnQpOw
+SECRETKEY: nnd1eFGsJ9uOjqG2zFmrcZ4xUVIO9F1bT4NwNNzT
+BUCKET: AUSTENPHOTOS
+
+
+
+
+---
+# 多环境配置
+# 开发环境
+spring:
+  profiles: dev
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1/austen?useUnicode=true&characterEncoding=utf8&useSSL=true
+    username: root
+    password: root
+
+---
+# 测试环境
+spring:
+  profiles: test
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1/austentest?useUnicode=true&characterEncoding=utf8&useSSL=true
+    username: root
+    password: root
+
+---
+# 生产环境
+spring:
+  profiles: pro
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1/austentest
+    username: root
+    password: root
+
+---

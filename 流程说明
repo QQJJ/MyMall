@@ -1,0 +1,67 @@
+支付宝App支付流程:
+(APP支付不能在沙箱测试、只能申请上线测试 )
+1.入驻平台,到open.alipay.com蚂蚁金服开放平台,开发者中心 创建应用,获取APPID,并可以申请开通开放产品使用权限
+2.创建完成后，需要给应用添加App支付功能才可使用此功能
+3.与蚂蚁金服签约(一般行业费率：0.6%；自2018年5月9日起，特殊行业新签约费率从1.2%调整为1%，特殊行业范围包括：休闲游戏；网络游戏点卡、渠道代理；游戏系统商；网游周边服务、交易平台；网游运营商（含网页游戏）)
+4.配置秘钥,可使用蚂蚁金服提供秘钥生成工具生成公钥与私钥,到开放平台开发者中心进行密钥配置，配置完成后可以获取: 支付宝公钥
+(支付宝开放平台SDK封装了签名和验签过程，只需配置账号及密钥参数)
+5.支付流程:
+商家APP->下单->商家后台->商家后台返回APP处理后的数据->App根据订单调用钱包支付->支付宝APP->支付宝后台支付->返回商家APP支付结果并异步通知商家后台支付结果
+6.开发所需SDK
+commons-logging 日志使用 alipay-sdk-java 支付宝SDK
+7.使用支付宝SDK,需要先初始化
+AlipayClient alipayClient = new DefaultAlipayClient(URL, APP_ID, APP_PRIVATE_KEY, FORMAT, CHARSET, ALIPAY_PUBLIC_KEY, SIGN_TYPE);
+URL	支付宝网关（固定）	https://openapi.alipay.com/gateway.do
+APP_ID	APPID即创建应用后生成
+APP_PRIVATE_KEY	开发者应用私钥，由开发者自己生成
+FORMAT	参数返回格式，只支持json	json（固定）
+CHARSET	请求和签名使用的字符编码格式，支持GBK和UTF-8	开发者根据实际工程编码配置
+ALIPAY_PUBLIC_KEY	支付宝公钥，由支付宝生成,(配置私钥和公钥后可获取支付宝公钥)
+SIGN_TYPE	商户生成签名字符串所使用的签名算法类型，目前支持RSA2和RSA，推荐使用RSA2	RSA2
+
+alipayClient只需要初始化一次，后续调用不同的API都可以使用同一个alipayClient对象。
+同步回调与异步回调接口(returnUrl, notifyUrl)接收到支付宝数据后,需要验签(使用rsaCheckV1),确定数据来源为支付宝推送
+
+##########################################################################################################################
+支付宝web支付:
+本次使用SDK版本:3.3.4.ALL
+第一步：创建应用
+1.蚂蚁金服开放平台（open.alipay.com）创建应用，获得应用唯一标识（APPID）；
+2.在【功能信息】中点击【添加功能】，选择【电脑网站支付】；
+3.提交审核，等待审核通过。
+第二步：配置密钥
+RSA密钥包含应用私钥(APP_PRIVATE_KEY)、应用公钥(APP_PUBLIC_KEY）可使用蚂蚁金服提供秘钥生成工具生成公钥与私钥,到开放平台开发者中心进行密钥配置，配置完成后可以获取: 支付宝公钥
+第三步：搭建和配置开发环境
+导入SDK
+<!-- 支付宝SDK日志使用 -->
+<dependency>
+    <groupId>commons-logging</groupId>
+    <artifactId>commons-logging</artifactId>
+    <version>1.1.1</version>
+</dependency>
+<!-- 支付宝SDK -->
+<dependency>
+    <groupId>com.alipay.sdk</groupId>
+    <artifactId>alipay-sdk-java</artifactId>
+    <version>3.3.4.ALL</version>
+</dependency>
+第四步: 接口调用
+①支付,接口: alipay.trade.page.pay
+1.流程: 用户web下单==>商户后台,处理订单数据==>返回web订单数据==>用户web支付==>商户后台,调用支付宝SDK alipay.trade.page.pay填充支付数据,发起支付请求==>返回web支付宝支付页面
+      ==>用户支付宝登陆支付==>支付宝服务器==>支付宝同步通知==>商户ReturnUrl==>可选处理,跳转页面等 同时支付宝异步通知==>商户NotifyURL==>验签,确定订单支付成功,进行业务逻辑处理,返回success
+(由于同步返回的不可靠性，支付结果必须以异步通知或查询接口返回为准，不能依赖同步跳转)
+(接收到异步通知并验签通过后，一定要检查通知内容，包括通知中的app_id、out_trade_no、total_amount是否与请求中的一致，并根据trade_status进行后续业务处理)
+
+②退款,接口: alipay.trade.refund
+1.流程: 用户/商户退款==>调用支付宝SDK alipay.trade.refund填充数据(交易号与商户订单号二选一)发起退款请求==>返回商户服务器退款结果
+
+③退款查询,接口: alipay.trade.fastpay.refund.query
+1.流程: 调用支付宝SDK alipay.trade.fastpay.refund.query填充数据(交易号与商户订单号二选一, 退款请求号)发起请求==>返回商户服务器退款结果
+
+④交易关闭, 接口:alipay.trade.close
+1.流程: 调用支付宝SDK alipay.trade.fastpay.refund.query填充数据(交易号与商户订单号二选一, 退款请求号)发起请求==>返回商户服务器关闭结果
+通常交易关闭是通过alipay.trade.page.pay中的超时时间来控制,用于主动关闭交易,成功关闭交易后该交易不可支付
+
+⑤查询对账单下载地址查询：接口 alipay.data.dataservice.bill.downloadurl.query
+1.流程:选择账单类型(trade指商户基于支付宝交易收单的业务账单；signcustomer是指基于商户支付宝余额收入及支出等资金变动的帐务账单；),账单日期 发起请求==>
+支付宝SDK==>返回文件下载URL==>请求URL获取csv文件进行业务逻辑处理
